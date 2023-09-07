@@ -48,20 +48,22 @@ public class Controller {
     @PostMapping(value="{gameCode}/{player}/next")
     public String getNext(@PathVariable String gameCode, @PathVariable String player){
         Game game = games.get(gameCode);
-        if(player == game.getChameleon()){
+        String nxt = game.getNext();
+        if(player.equals(game.getChameleon())){
             return "chameleon";
         }    
 
-        return game.getNext();        
+        return nxt;        
     }
 
     @GetMapping(value="{gameCode}/{player}/current")
     public String getCurrent(@PathVariable String gameCode, @PathVariable String player){
         Game game = games.get(gameCode);
-        if(player == game.getChameleon()){
+        String current = game.getCurrent();
+        if(player.equals(game.getChameleon())){
             return "chameleon";
         }        
 
-        return game.getCurrent();  
+        return current;  
     }
 }
