@@ -15,14 +15,18 @@ public class Game {
     private static final int CODE_LENGTH = 4;
     private String chameleon;
     private String current = "";
+    private int numberOfPlayers;
+    private int round;
 
     Random randomNumberGenerator = new Random();
 
-    public Game() {
+    public Game(int numberOfPlayers) {
+        this.numberOfPlayers = numberOfPlayers;
         this.players = new LinkedList<String>();
         boolean newCodeGenerated = false;
         String newCode = "";
         chameleon = "";
+        round = 0;
 
         while (!newCodeGenerated) {
             newCode = "";
@@ -35,6 +39,14 @@ public class Game {
                 newCodeGenerated = true;
             }
         }
+    }
+
+    public int getRound() {
+        return round;
+    }
+
+    public int getNumberOfPlayers() {
+        return numberOfPlayers;
     }
 
     public void addPlayer(String name) {
@@ -58,6 +70,7 @@ public class Game {
         int index = randomNumberGenerator.nextInt(4);
         chameleon = players.get(randomNumberGenerator.nextInt(players.size()));
         current = "ABCD".substring(index, index+1) + number;
+        round ++;
         return current;
     }
 

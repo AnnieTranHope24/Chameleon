@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,10 +19,27 @@ import org.springframework.web.bind.annotation.RestController;
 public class Controller {
     Map<String, Game> games = new HashMap<String, Game>();
 
-    @PostMapping(value="newGame/{player}")
-    public ResponseEntity<String> newGame(@PathVariable String player){
-        Game game = new Game();
-        game.addPlayer(player);
+    private static record NewGameRequest(
+        String hostPlayerName, int numberOfPlayers
+    ){}
+
+    private static record JoinGameRequest(
+    String playerName
+    ){}
+
+    private static record JoinGameResponse(
+        int numberOfPlayers, List<String> currentPlayers
+    ){} 
+
+    private static record NextOrCurrentResponse(
+        String clue, int round
+    ) {}
+
+    @PostMapping(value="game")
+    public ResponseEntity<String> newGame(@RequestBody NewGameRequest request){
+        
+        Game game = new Game(request.numberOfPlayers);
+        game.addPlayer(request.hostPlayerName);
         games.put(game.getCode(), game);
 
         return new ResponseEntity<String>(game.getCode(), HttpStatus.OK);
@@ -33,10 +51,12 @@ public class Controller {
         return new ResponseEntity<List<String>>(game.getPlayers(), HttpStatus.OK);
     }
 
-    @PostMapping(value="{gameCode}/addPlayer/{player}")
-    public void addPlayer(@PathVariable String gameCode, @PathVariable String player){
+    @PostMapping(value="game/{gameCode}/players")
+    public ResponseEntity<JoinGameResponse> addPlayer(@PathVariable String gameCode, @RequestBody JoinGameRequest request){
         Game game = games.get(gameCode);
-        game.addPlayer(player);
+        game.addPlayer(request.playerName);
+
+        return new ResponseEntity<JoinGameResponse> (new JoinGameResponse(game.getNumberOfPlayers(), game.getPlayers()), HttpStatus.OK);
     }
 
     @DeleteMapping(value="{gameCode}/players/{player}")
@@ -45,25 +65,25 @@ public class Controller {
         game.removePlayer(player);
     }
 
-    @PostMapping(value="{gameCode}/{player}/next")
-    public String getNext(@PathVariable String gameCode, @PathVariable String player){
+    @PostMapping(value="game/{gameCode}/round/{playerName}")
+    public ResponseEntity<NextOrCurrentResponse> getNext(@PathVariable String gameCode, @PathVariable String playerName){
         Game game = games.get(gameCode);
         String nxt = game.getNext();
-        if(player.equals(game.getChameleon())){
-            return "chameleon";
-        }    
-
-        return nxt;        
+        return clueOrChameleon(playerName, game, nxt);     
     }
 
-    @GetMapping(value="{gameCode}/{player}/current")
-    public String getCurrent(@PathVariable String gameCode, @PathVariable String player){
+    @GetMapping(value="game/{gameCode}/round/{playerName}")
+    public ResponseEntity<NextOrCurrentResponse> getCurrent(@PathVariable String gameCode, @PathVariable String playerName){
         Game game = games.get(gameCode);
         String current = game.getCurrent();
-        if(player.equals(game.getChameleon())){
-            return "chameleon";
-        }        
-
-        return current;  
+        return clueOrChameleon(playerName, game, current);  
     }
+
+    private ResponseEntity<NextOrCurrentResponse> clueOrChameleon(String playerName, Game game, String nxtOrCur) {
+        if(playerName.equals(game.getChameleon())){
+            return new ResponseEntity<NextOrCurrentResponse> (new NextOrCurrentResponse("chameleon", game.getRound()), HttpStatus.OK);
+        }    
+
+        return new ResponseEntity<NextOrCurrentResponse> (new NextOrCurrentResponse(nxtOrCur, game.getRound()), HttpStatus.OK);
+    }    
 }
