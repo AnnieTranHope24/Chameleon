@@ -30,7 +30,8 @@ public class Game {
 
         while (!newCodeGenerated) {
             newCode = "";
-            for (int i = 0; i < CODE_LENGTH; i++) {
+            newCode += randomNumberGenerator.nextInt(9)+1;
+            for (int i = 1; i < CODE_LENGTH; i++) {
                 newCode += randomNumberGenerator.nextInt(10);
             }
             if (!codes.contains(newCode)) {
