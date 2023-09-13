@@ -17,6 +17,7 @@ public class Game {
     private String current = "";
     private int numberOfPlayers;
     private int round;
+    private long timeStmp;
 
     Random randomNumberGenerator = new Random();
 
@@ -27,6 +28,7 @@ public class Game {
         String newCode = "";
         chameleon = "";
         round = 0;
+        timeStmp = System.currentTimeMillis();
 
         while (!newCodeGenerated) {
             newCode = "";
@@ -40,6 +42,14 @@ public class Game {
                 newCodeGenerated = true;
             }
         }
+    }
+
+    public long getTimeStmp() {
+        return timeStmp;
+    }
+
+    public void setTimeStmp(long timeStmp) {
+        this.timeStmp = timeStmp;
     }
 
     public int getRound() {
@@ -72,6 +82,7 @@ public class Game {
         chameleon = players.get(randomNumberGenerator.nextInt(players.size()));
         current = "ABCD".substring(index, index+1) + number;
         round ++;
+        timeStmp ++;
         return current;
     }
 
