@@ -42,6 +42,12 @@ public class Controller {
         game.addPlayer(request.hostPlayerName);
         games.put(game.getCode(), game);
 
+        for (Game g : games.values()) {
+            if (g.getTimeStmp() <= System.currentTimeMillis() - 600000) {
+                games.remove(g.getCode());
+            }
+        }
+
         return new ResponseEntity<String>(game.getCode(), HttpStatus.OK);
     }
 
@@ -69,6 +75,11 @@ public class Controller {
     public ResponseEntity<NextOrCurrentResponse> getNext(@PathVariable String gameCode, @PathVariable String playerName){
         Game game = games.get(gameCode);
         String nxt = game.getNext();
+
+        if(!games.containsKey(gameCode)){
+            return ResponseEntity.notFound().build();
+        }
+        
         return clueOrChameleon(playerName, game, nxt);     
     }
 
