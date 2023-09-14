@@ -87,6 +87,11 @@ public class Controller {
     public ResponseEntity<NextOrCurrentResponse> getCurrent(@PathVariable String gameCode, @PathVariable String playerName){
         Game game = games.get(gameCode);
         String current = game.getCurrent();
+
+        if(!games.containsKey(gameCode)){
+            return ResponseEntity.notFound().build();
+        }        
+        
         return clueOrChameleon(playerName, game, current);  
     }
 
