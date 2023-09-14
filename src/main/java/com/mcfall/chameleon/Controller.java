@@ -3,6 +3,7 @@ package com.mcfall.chameleon;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Iterator;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,15 @@ public class Controller {
         game.addPlayer(request.hostPlayerName);
         games.put(game.getCode(), game);
 
+        Iterator<Map.Entry<String, Game>> it = games.entrySet().iterator();
+
+        while (it.hasNext()) {
+            Map.Entry<String, Game> entry = it.next();
+            if (entry.getValue().getTimeStmp() <= System.currentTimeMillis() - 600000) {
+                it.remove();
+            }
+        }
+
         return new ResponseEntity<String>(game.getCode(), HttpStatus.OK);
     }
 
@@ -69,6 +79,11 @@ public class Controller {
     public ResponseEntity<NextOrCurrentResponse> getNext(@PathVariable String gameCode, @PathVariable String playerName){
         Game game = games.get(gameCode);
         String nxt = game.getNext();
+
+        if(!games.containsKey(gameCode)){
+            return ResponseEntity.notFound().build();
+        }
+        
         return clueOrChameleon(playerName, game, nxt);     
     }
 
@@ -76,6 +91,11 @@ public class Controller {
     public ResponseEntity<NextOrCurrentResponse> getCurrent(@PathVariable String gameCode, @PathVariable String playerName){
         Game game = games.get(gameCode);
         String current = game.getCurrent();
+
+        if(!games.containsKey(gameCode)){
+            return ResponseEntity.notFound().build();
+        }        
+
         return clueOrChameleon(playerName, game, current);  
     }
 
